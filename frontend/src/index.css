@@ -1,0 +1,49 @@
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import 'tailwindcss';
+
+:root {
+  --color-void: #08080D;
+  --color-obsidian: #111118;
+  --color-gunmetal: #1A1A24;
+  --color-steel: #6B6B7B;
+  --color-silver: #C8C8D4;
+  --color-near-white: #EDEDF4;
+  --color-quantum-blue: #4F7DF3;
+  --color-violet: #8B5CF6;
+  --color-cyan: #22D3EE;
+  --color-magenta: #D946EF;
+}
+
+@theme {
+  --color-void: #08080D;
+  --color-obsidian: #111118;
+  --color-gunmetal: #1A1A24;
+  --color-steel: #6B6B7B;
+  --color-silver: #C8C8D4;
+  --color-near-white: #EDEDF4;
+  --color-quantum-blue: #4F7DF3;
+  --color-violet: #8B5CF6;
+  --color-cyan: #22D3EE;
+  --color-magenta: #D946EF;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-silver);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
