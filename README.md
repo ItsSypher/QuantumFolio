@@ -1,5 +1,7 @@
 # QuantumFolio
 
+**Live demo: [quantum-folio.vercel.app](https://quantum-folio.vercel.app/)**
+
 > **Proof of concept.** A quantum-inspired portfolio optimiser that runs entirely on classical hardware, designed to be drop-in replaceable with a real quantum computer the moment one is available.
 
 QuantumFolio lets anyone build an optimised investment portfolio using a quantum algorithm — no finance background, no physics degree required. Pick your stocks, set how much risk you're comfortable with, and watch the quantum solver work in real time: probability distributions collapsing, quantum states rotating on the Bloch sphere, energy descending toward the optimum. When it finishes, you get a plain-language breakdown of exactly which assets to hold and why.
