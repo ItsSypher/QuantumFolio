@@ -41,12 +41,17 @@ async def push_done(q: asyncio.Queue) -> None:
 
 
 async def ws_handler(websocket: WebSocket, job_id: str) -> None:
+    # Accept unconditionally first — CORSMiddleware does not cover WebSocket
+    # connections; Starlette fires a 403 if any other operation is attempted
+    # before accept(), including close().
+    await websocket.accept()
+
     q = get_queue(job_id)
     if q is None:
-        await websocket.close(code=4404, reason="Job not found")
+        await websocket.send_text(json.dumps({"type": "error", "data": {"message": "Job not found"}}))
+        await websocket.close(code=4404)
         return
 
-    await websocket.accept()
     try:
         while True:
             item = await q.get()
