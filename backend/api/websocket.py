@@ -46,7 +46,16 @@ async def ws_handler(websocket: WebSocket, job_id: str) -> None:
     # before accept(), including close().
     await websocket.accept()
 
-    q = get_queue(job_id)
+    # Poll briefly for the queue in case the WebSocket arrives fractionally
+    # before create_job() has populated the registry (can happen under load
+    # or on Koyeb when the solver task hasn't been scheduled yet).
+    q = None
+    for _ in range(8):          # wait up to ~4 s in 0.5 s increments
+        q = get_queue(job_id)
+        if q is not None:
+            break
+        await asyncio.sleep(0.5)
+
     if q is None:
         await websocket.send_text(json.dumps({"type": "error", "data": {"message": "Job not found"}}))
         await websocket.close(code=4404)

@@ -27,7 +27,7 @@ export default function InputView() {
           else if (msg.type === 'error') { setError(msg.data.message); setView('input'); }
         },
         () => {},
-        () => { setError('Connection lost. Please try again.'); setView('input'); }
+        () => { setError('Connection lost. Please try again.'); setView('input'); },
       );
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to start optimization');

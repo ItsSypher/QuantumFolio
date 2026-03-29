@@ -9,7 +9,7 @@ dist/
 .uv/
 
 # uv
-backend/.python-version
+# backend/.python-version
 
 # Node
 frontend/node_modules/

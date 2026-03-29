@@ -27,18 +27,43 @@ export function connectSolverStream(
   jobId: string,
   onMessage: (msg: WsMessage) => void,
   onClose: () => void,
-  onError: (e: Event) => void
-): WebSocket {
-  const ws = new WebSocket(`${WS_BASE}/ws/${jobId}`);
-  ws.onmessage = (e) => {
-    try {
-      const msg = JSON.parse(e.data) as WsMessage;
-      onMessage(msg);
-    } catch {
-      // ignore malformed frames
-    }
-  };
-  ws.onclose = onClose;
-  ws.onerror = onError;
-  return ws;
+  onError: (e: Event) => void,
+  maxRetries = 4,
+): () => void {
+  let ws: WebSocket | null = null;
+  let retries = 0;
+  let cancelled = false;
+
+  function connect() {
+    if (cancelled) return;
+    ws = new WebSocket(`${WS_BASE}/ws/${jobId}`);
+    let opened = false;
+
+    ws.onopen = () => { opened = true; };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data) as WsMessage;
+        onMessage(msg);
+      } catch {
+        // ignore malformed frames
+      }
+    };
+    ws.onerror = (e) => {
+      if (opened) onError(e);
+      // if not yet opened, onclose will handle the retry
+    };
+    ws.onclose = () => {
+      if (!opened && retries < maxRetries) {
+        // connection was rejected before it opened — retry with backoff
+        retries++;
+        setTimeout(connect, 800 * retries);
+      } else {
+        onClose();
+      }
+    };
+  }
+
+  connect();
+  // return a cancel function so callers can tear down if needed
+  return () => { cancelled = true; ws?.close(); };
 }
