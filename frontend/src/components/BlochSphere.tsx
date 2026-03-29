@@ -22,7 +22,7 @@ function AxisLabel({ position, label, color }: { position: Vec3; label: string; 
 
 function BlochScene({ blochState }: { blochState: Vec3 }) {
   const tip = normalise(blochState);
-  const AX = 1.58; // axis line + label distance, just outside sphere
+  const AX = 1.4; // axis line + label distance, just outside sphere
 
   return (
     <>
