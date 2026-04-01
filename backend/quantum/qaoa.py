@@ -282,7 +282,6 @@ def run_qaoa(
                 betas=display_betas,
             )
 
-            status = "converged" if cumulative_iter == total_iters else "running"
             snapshot: dict[str, Any] = {
                 "iteration": cumulative_iter,
                 "max_iterations": total_iters,
@@ -293,7 +292,7 @@ def run_qaoa(
                 "top_portfolios": top_portfolios,
                 "bloch_state": list(bloch),
                 "narration": _narrate(cumulative_iter, total_iters, energy, top_portfolios, N),
-                "status": status,
+                "status": "running",
             }
             yield snapshot
 
@@ -302,8 +301,53 @@ def run_qaoa(
             # Add small noise around best params
             params = global_best_params + rng.normal(0, 0.1, 2 * p_layers)
 
-    # Final state from global best parameters
+    # ── Final snapshot from global-best parameters ─────────────────────────
+    # The portfolio recommendation is built from global_best_params (the
+    # lowest-energy params seen across all restarts), which may come from any
+    # earlier iteration.  Yield one extra "converged" snapshot using those
+    # exact params so the last frame of the quantum journey is always
+    # consistent with the recommended portfolio shown on the results screen.
     if global_best_params is None:
         global_best_params = params
     final_state = _compute_state(global_best_params, p_layers, cost, N)
-    return np.abs(final_state) ** 2
+    final_probs = np.abs(final_state) ** 2
+    final_energy = _energy(final_state, cost)
+
+    final_top_idx = np.argsort(final_probs)[::-1][:5]
+    final_top_portfolios: list[dict] = []
+    for idx in final_top_idx:
+        assets = [tickers[q] for q in range(N) if (idx >> q) & 1]
+        if not assets:
+            continue
+        label = " + ".join(assets[:4]) + ("…" if len(assets) > 4 else "")
+        final_top_portfolios.append({
+            "assets": assets,
+            "probability": float(final_probs[idx]),
+            "label": label,
+        })
+
+    final_bloch = _bloch_vector(final_state, N)
+    final_gammas = global_best_params[:p_layers].tolist()
+    final_betas  = global_best_params[p_layers:].tolist()
+    final_circuit = build_circuit_repr(min(N, 8), p_layers,
+                                       gammas=final_gammas, betas=final_betas)
+    top_label = final_top_portfolios[0]["label"] if final_top_portfolios else "the portfolio"
+    top_prob  = f"{final_top_portfolios[0]['probability'] * 100:.1f}%" if final_top_portfolios else ""
+    yield {
+        "iteration": total_iters,
+        "max_iterations": total_iters,
+        "loss": float(final_energy),
+        "parameters": global_best_params.tolist(),
+        "circuit_depth": p_layers * 3 + 1,
+        "circuit_repr": final_circuit,
+        "top_portfolios": final_top_portfolios,
+        "bloch_state": list(final_bloch),
+        "narration": (
+            f"Optimisation complete. The best circuit found selects {top_label} "
+            f"with {top_prob} probability — these are the parameters used to build "
+            f"your recommended portfolio."
+        ),
+        "status": "converged",
+    }
+
+    return final_probs
