@@ -1,8 +1,10 @@
-import { Component, type ReactNode } from 'react';
+import { Component, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useStore } from './store';
 import InputView from './views/InputView';
 import SolverView from './views/SolverView';
 import ResultsView from './views/ResultsView';
+import WakeUpScreen from './components/WakeUpScreen';
+import { checkHealth } from './api';
 
 // ── Error boundary so any component crash shows a message, not a white page ──
 class ErrorBoundary extends Component<
@@ -59,6 +61,23 @@ class ErrorBoundary extends Component<
 // ── Main app ──────────────────────────────────────────────────────────────────
 function AppInner() {
   const { view, error, setError, setView } = useStore();
+
+  // 'checking' → silent first probe; 'sleeping' → show WakeUpScreen; 'awake' → normal
+  const [backend, setBackend] = useState<'checking' | 'sleeping' | 'awake'>('checking');
+  const handleReady = useCallback(() => setBackend('awake'), []);
+
+  useEffect(() => {
+    // Quick initial probe — if it replies within 3 s the service is warm, skip the screen
+    checkHealth(3000).then((ok) => setBackend(ok ? 'awake' : 'sleeping'));
+  }, []);
+
+  if (backend === 'checking') {
+    // Blank void while the first probe is in flight (usually < 200 ms on a warm backend)
+    return <div style={{ minHeight: '100vh', background: '#08080D' }} />;
+  }
+  if (backend === 'sleeping') {
+    return <WakeUpScreen onReady={handleReady} />;
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-void)' }}>

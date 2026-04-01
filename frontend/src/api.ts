@@ -3,6 +3,19 @@ import type { WsMessage } from './types';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const WS_BASE  = import.meta.env.VITE_WS_URL  || 'ws://localhost:8000';
 
+/** Returns true if the backend responds to /ping within `timeoutMs`. */
+export async function checkHealth(timeoutMs = 4000): Promise<boolean> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    const res = await fetch(`${API_BASE}/ping`, { signal: ctrl.signal });
+    clearTimeout(t);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function searchTickers(q: string) {
   const res = await fetch(`${API_BASE}/api/tickers/search?q=${encodeURIComponent(q)}`);
   if (!res.ok) throw new Error('Search failed');

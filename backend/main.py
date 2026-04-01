@@ -34,6 +34,12 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 
+@app.get("/ping")
+async def ping() -> dict:
+    """Lightweight liveness probe — used by the frontend to detect cold-start."""
+    return {"ok": True}
+
+
 @app.websocket("/ws/{job_id}")
 async def websocket_endpoint(websocket: WebSocket, job_id: str) -> None:
     await ws_handler(websocket, job_id)
