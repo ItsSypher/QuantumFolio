@@ -2,6 +2,34 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContai
 import { useStore } from '../store';
 import type { SolverSnapshot } from '../types';
 
+interface TooltipArgs { active?: boolean; payload?: { value: number }[]; label?: string | number; }
+
+function CustomTooltip({ active, payload, label }: TooltipArgs) {
+  if (!active || !payload?.length) return null;
+  const value = payload[0].value as number;
+  return (
+    <div style={{
+      background: 'rgba(10, 10, 18, 0.82)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(79, 125, 243, 0.25)',
+      borderRadius: 6,
+      padding: '8px 12px',
+      boxShadow: '0 0 18px rgba(79, 125, 243, 0.1)',
+      pointerEvents: 'none',
+    }}>
+      <p style={{ margin: 0, fontSize: 10, color: '#606080', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
+        Iter {label}
+      </p>
+      <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#4F7DF3', letterSpacing: '-0.01em' }}>
+        {typeof value === 'number' ? value.toFixed(4) : value}
+      </p>
+      <p style={{ margin: '3px 0 0', fontSize: 10, color: '#606080', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        energy
+      </p>
+    </div>
+  );
+}
+
 interface Props {
   snapshotsOverride?: SolverSnapshot[];
   upToIdx?: number;
@@ -28,15 +56,8 @@ export default function LossChart({ snapshotsOverride, upToIdx }: Props) {
           <XAxis dataKey="i" hide />
           <YAxis hide domain={['auto', 'auto']} />
           <Tooltip
-            contentStyle={{
-              background: 'var(--color-gunmetal)',
-              border: 'none',
-              borderRadius: 4,
-              fontSize: 12,
-              color: 'var(--color-near-white)',
-            }}
-            formatter={(v) => [typeof v === 'number' ? v.toFixed(4) : String(v), 'Loss']}
-            labelFormatter={(l) => `Iter ${l}`}
+            content={<CustomTooltip />}
+            cursor={{ stroke: 'rgba(79, 125, 243, 0.2)', strokeWidth: 1, strokeDasharray: '4 2' }}
           />
           <Line
             type="monotone"
