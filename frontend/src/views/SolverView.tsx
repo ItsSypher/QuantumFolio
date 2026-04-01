@@ -4,6 +4,7 @@ import ProbabilityChart from '../components/ProbabilityChart';
 import CircuitDiagram from '../components/CircuitDiagram';
 import BlochSphere from '../components/BlochSphere';
 import ProgressBar from '../components/ProgressBar';
+import LegalDisclaimer from '../components/LegalDisclaimer';
 
 export default function SolverView() {
   return (
@@ -28,6 +29,8 @@ export default function SolverView() {
         <CircuitDiagram />
         <BlochSphere />
       </div>
+
+      <LegalDisclaimer />
     </div>
   );
 }

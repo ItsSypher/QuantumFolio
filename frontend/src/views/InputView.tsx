@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TickerSearch from '../components/TickerSearch';
 import RiskSlider from '../components/RiskSlider';
+import LegalDisclaimer from '../components/LegalDisclaimer';
 import { useStore } from '../store';
 import { startOptimize, connectSolverStream } from '../api';
 import type { WsMessage } from '../types';
@@ -36,34 +37,34 @@ export default function InputView() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-xl space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8">
+      <div className="w-full max-w-2xl space-y-10">
         {/* Header */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--color-gunmetal)] rounded-full text-xs text-[var(--color-quantum-blue)] uppercase tracking-widest mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-quantum-blue)] animate-pulse" />
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[var(--color-gunmetal)] rounded-full text-sm text-[var(--color-quantum-blue)] uppercase tracking-widest mb-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-quantum-blue)] animate-pulse" />
             Quantum-Powered
           </div>
-          <h1 className="text-4xl font-light text-[var(--color-near-white)] tracking-tight">
+          <h1 className="text-5xl font-light text-[var(--color-near-white)] tracking-tight">
             QuantumFolio
           </h1>
-          <p className="text-[var(--color-steel)] text-sm max-w-sm mx-auto leading-relaxed">
+          <p className="text-[var(--color-steel)] text-base max-w-md mx-auto leading-relaxed">
             Build an optimised investment portfolio. Pick your stocks, set your risk
             preference, and watch a quantum solver find your best combination.
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-[var(--color-obsidian)] border border-[var(--color-gunmetal)] rounded-[6px] p-6 space-y-6">
+        <div className="bg-[var(--color-obsidian)] border border-[var(--color-gunmetal)] rounded-[8px] p-8 space-y-8">
           <div>
-            <label className="block text-xs text-[var(--color-steel)] uppercase tracking-widest mb-2">
+            <label className="block text-sm text-[var(--color-steel)] uppercase tracking-widest mb-3">
               Your Stocks
             </label>
             <TickerSearch />
           </div>
 
           <div>
-            <label className="block text-xs text-[var(--color-steel)] uppercase tracking-widest mb-3">
+            <label className="block text-sm text-[var(--color-steel)] uppercase tracking-widest mb-4">
               Your Goal
             </label>
             <RiskSlider />
@@ -72,28 +73,30 @@ export default function InputView() {
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="w-full py-3 rounded-[5px] text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-4 rounded-[6px] text-base font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
               background: canSubmit
                 ? 'linear-gradient(135deg, var(--color-quantum-blue), var(--color-violet))'
                 : 'var(--color-gunmetal)',
               color: 'var(--color-near-white)',
-              boxShadow: canSubmit ? '0 0 24px rgba(79,125,243,0.2)' : 'none',
+              boxShadow: canSubmit ? '0 0 28px rgba(79,125,243,0.22)' : 'none',
             }}
           >
             {loading ? 'Starting…' : 'Find My Portfolio'}
           </button>
 
           {selectedTickers.length < 5 && (
-            <p className="text-center text-xs text-[var(--color-steel)]">
+            <p className="text-center text-sm text-[var(--color-steel)]">
               Select at least 5 stocks to begin
             </p>
           )}
         </div>
 
-        <p className="text-center text-xs text-[var(--color-steel)]">
+        <p className="text-center text-sm text-[var(--color-steel)]">
           No account needed · Data from Yahoo Finance · Runs entirely on our server
         </p>
+
+        <LegalDisclaimer />
       </div>
     </div>
   );

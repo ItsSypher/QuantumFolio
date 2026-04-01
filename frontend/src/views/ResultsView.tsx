@@ -6,6 +6,7 @@ import LossChart from '../components/LossChart';
 import ProbabilityChart from '../components/ProbabilityChart';
 import CircuitDiagram from '../components/CircuitDiagram';
 import BlochSphere from '../components/BlochSphere';
+import LegalDisclaimer from '../components/LegalDisclaimer';
 
 export default function ResultsView() {
   const { result, snapshots, playbackIdx, setPlaybackIdx, reset } = useStore();
@@ -108,7 +109,7 @@ export default function ResultsView() {
       )}
 
       {/* Run again */}
-      <div className="text-center pt-2 pb-8">
+      <div className="text-center pt-2">
         <button
           onClick={reset}
           className="px-8 py-3 border border-[var(--color-gunmetal)] rounded-[5px] text-sm text-[var(--color-silver)] hover:border-[var(--color-quantum-blue)] hover:text-[var(--color-near-white)] hover:shadow-[0_0_16px_rgba(79,125,243,0.12)] transition-all duration-200"
@@ -116,6 +117,8 @@ export default function ResultsView() {
           Run Again
         </button>
       </div>
+
+      <LegalDisclaimer />
     </div>
   );
 }
