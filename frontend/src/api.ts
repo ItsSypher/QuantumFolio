@@ -8,7 +8,7 @@ export async function checkHealth(timeoutMs = 4000): Promise<boolean> {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
-    const res = await fetch(`${API_BASE}/ping`, { signal: ctrl.signal });
+    const res = await fetch(`${API_BASE}/api/ping`, { signal: ctrl.signal });
     clearTimeout(t);
     return res.ok;
   } catch {

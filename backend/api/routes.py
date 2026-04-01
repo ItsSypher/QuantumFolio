@@ -20,6 +20,12 @@ STREAM_DURATION_SECS = 20.0
 MIN_SNAPSHOT_DELAY = 0.08   # never faster than 80 ms even with many snapshots
 
 
+@router.get("/ping")
+async def ping() -> dict:
+    """Lightweight liveness probe — used by the frontend to detect cold-start."""
+    return {"ok": True}
+
+
 @router.get("/tickers/search", response_model=list[TickerSuggestion])
 async def ticker_search(q: str = "") -> list[dict]:
     return search_tickers(q, limit=10)
