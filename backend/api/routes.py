@@ -48,8 +48,8 @@ async def start_optimize(req: OptimizeRequest) -> dict:
         names = fin_data.names
         N = len(tickers)
 
-        p_layers = 2 if N <= 10 else 1
-        max_iters = 90   # 3 restarts × 30 iterations each
+        p_layers = 2      # p=2 for all N; vectorised mixer handles N=16 fine
+        max_iters = 300  # 3 restarts × 100 iterations each
 
         # ── Run QAOA synchronously in thread pool ──────────────────────
         def _run_sync():

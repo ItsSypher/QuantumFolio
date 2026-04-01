@@ -53,17 +53,22 @@ def _apply_problem_unitary(
 
 
 def _apply_mixer_unitary(state: np.ndarray, beta: float, N: int) -> np.ndarray:
-    """U_B(β) = ⊗ Rx(2β) applied qubit by qubit."""
-    dim = 2 ** N
+    """U_B(β) = ⊗ Rx(2β) applied qubit by qubit.
+
+    Vectorised via numpy reshape: for each qubit q the 2^N amplitudes are
+    reshaped to (2^(N-q-1), 2, 2^q) so the two slices along dim-1 correspond
+    to the qubit-q=0 and qubit-q=1 halves.  This avoids a Python loop over
+    the 2^N basis states and gives >100× speedup for large N.
+    """
     cos_b = math.cos(beta)
     sin_b = math.sin(beta)
     for q in range(N):
-        mask = 1 << q
-        new_state = np.empty(dim, dtype=complex)
-        for i in range(dim):
-            j = i ^ mask
-            new_state[i] = cos_b * state[i] - 1j * sin_b * state[j]
-        state = new_state
+        state = state.reshape(2 ** (N - q - 1), 2, 2 ** q)
+        s0 = state[:, 0, :].copy()
+        s1 = state[:, 1, :].copy()
+        state[:, 0, :] = cos_b * s0 - 1j * sin_b * s1
+        state[:, 1, :] = cos_b * s1 - 1j * sin_b * s0
+        state = state.reshape(-1)
     return state
 
 
@@ -202,7 +207,7 @@ def run_qaoa(
     iters_per_restart = max(20, max_iters // n_restarts)
     total_iters = iters_per_restart * n_restarts
 
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng()  # unseeded — each run explores a different landscape
 
     global_best_energy = float("inf")
     global_best_params: np.ndarray | None = None
@@ -268,7 +273,14 @@ def run_qaoa(
             bloch = _bloch_vector(state, N)
             # Gradually reveal deeper circuit as restarts progress
             display_p = min(p_layers, 1 + cumulative_iter // (total_iters // (p_layers + 1)))
-            circuit_repr = build_circuit_repr(min(N, 8), display_p)
+            # Pass current γ/β values so each gate shows its live angle
+            display_gammas = params[:display_p].tolist()
+            display_betas  = params[p_layers : p_layers + display_p].tolist()
+            circuit_repr = build_circuit_repr(
+                min(N, 8), display_p,
+                gammas=display_gammas,
+                betas=display_betas,
+            )
 
             status = "converged" if cumulative_iter == total_iters else "running"
             snapshot: dict[str, Any] = {

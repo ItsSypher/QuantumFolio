@@ -1,8 +1,8 @@
 import { useStore } from '../store';
 import type { Gate, SolverSnapshot } from '../types';
 
-const QUBIT_HEIGHT = 28;
-const LAYER_WIDTH = 44;
+const QUBIT_HEIGHT = 32;
+const LAYER_WIDTH = 48;
 const LEFT_MARGIN = 40;
 const TOP_MARGIN = 24;
 
@@ -41,7 +41,7 @@ export default function CircuitDiagram({ snapshot }: Props) {
     <div className="bg-[var(--color-obsidian)] border border-[var(--color-gunmetal)] rounded-[5px] p-4">
       <p className="text-[var(--color-steel)] text-xs mb-1 uppercase tracking-widest">Quantum Circuit</p>
       <p className="text-[var(--color-silver)] text-xs mb-3">
-        Depth {data.circuit_depth} — the circuit is getting deeper, meaning the solver is thinking harder
+        The γ (RZ) and β (RX) rotation angles evolve each iteration as the solver tunes the circuit
       </p>
       <div className="overflow-x-auto">
         <svg width={Math.min(svgWidth, 600)} height={svgHeight} viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
@@ -76,14 +76,22 @@ export default function CircuitDiagram({ snapshot }: Props) {
               );
             }
 
+            const hasAngle = gate.angle !== undefined;
+            const boxH = hasAngle ? 26 : 18;
             return (
               <g key={i}>
-                <rect x={x - 11} y={y - 9} width={22} height={18} rx={3}
+                <rect x={x - 14} y={y - boxH / 2} width={28} height={boxH} rx={3}
                   fill={color} fillOpacity={0.15} stroke={color} strokeWidth={1} />
-                <text x={x} y={y + 4} textAnchor="middle"
+                <text x={x} y={hasAngle ? y - 3 : y + 4} textAnchor="middle"
                   fill={color} fontSize={9} fontFamily="monospace" fontWeight="600">
                   {gate.type}
                 </text>
+                {hasAngle && (
+                  <text x={x} y={y + 9} textAnchor="middle"
+                    fill={color} fontSize={7} fontFamily="monospace" opacity={0.8}>
+                    {gate.angle!.toFixed(2)}
+                  </text>
+                )}
               </g>
             );
           })}

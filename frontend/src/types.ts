@@ -8,6 +8,7 @@ export interface Gate {
   qubit: number;
   target?: number;
   layer: number;
+  angle?: number; // rotation in radians, present on RZ/RX; changes every iteration
 }
 
 export interface TopPortfolio {
